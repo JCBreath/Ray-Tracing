@@ -4,6 +4,7 @@
 #include "LensCamera.h"
 #include "ConstantBackground.h"
 #include "PointLight.h"
+#include "AreaLight.h"
 #include "LambertianMaterial.h"
 #include "PhongMaterial.h"
 #include "Group.h"
@@ -447,10 +448,34 @@ Light *Parser::parsePointLight()
   return new PointLight( position, color );
 }
 
+Light *Parser::parseAreaLight()
+{
+  Point position( 0.0, 0.0, 10.0 );
+  Color color( 1.0, 1.0, 1.0 );
+  double r = 1.0;
+  if ( peek( Token::left_brace ) )
+    for ( ; ; )
+    {
+      if ( peek( "position" ) )
+        position = parsePoint();
+      else if ( peek( "color" ) )
+        color = parseColor();
+      else if ( peek( "r" ) )
+        r = parseReal();
+      else if ( peek( Token::right_brace ) )
+        break;
+      else
+        throwParseException( "Expected `position', `color' or }." );
+    }
+  return new AreaLight( position, color, r );
+}
+
 Light *Parser::parseLight()
 {
     if ( peek( "point" ) )
       return parsePointLight();
+    if ( peek( "area" ) )
+      return parseAreaLight();
     throwParseException( "Expected a light type." );
     return 0;
 }

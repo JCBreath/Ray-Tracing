@@ -65,13 +65,13 @@ void Scene::render()
   }
   int xres = image->getXresolution();
   int yres = image->getYresolution();
-  setMaxRayDepth(5);
+  setMaxRayDepth(3);
   RenderContext context(this);
   double dx = 2./xres;
   double xmin = -1. + dx/2.;
   double dy = 2./yres;
   double ymin = -1. + dy/2.;
-  Color atten(.5,.5,.5);
+  Color atten(1.,1.,1.);
   for(int i=0;i<yres;i++){
     //cerr << "y=" << i << '\n';
     double y = ymin + i*dy;

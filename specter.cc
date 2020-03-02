@@ -14,6 +14,7 @@
 #include "LensCamera.h"
 #include "Plane.h"
 #include "PointLight.h"
+#include "AreaLight.h"
 #include "Ray.h"
 #include "Scene.h"
 #include "Sphere.h"

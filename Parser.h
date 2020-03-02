@@ -72,6 +72,7 @@ class Parser {
   Background *parseBackground();
 
   Light *parsePointLight();
+  Light *parseAreaLight();
   Light *parseLight();
 
   Material *parseLambertianMaterial();
