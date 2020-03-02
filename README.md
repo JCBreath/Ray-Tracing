@@ -15,3 +15,10 @@
 <b>Shutter</b>        1s  
 </pre>
 ![SSAA x16, f/2.8, 1s](https://github.com/JCBreath/Ray-Tracing/raw/master/images/dof%2Bssaa_x16%2B1s_shutter_larger_aperture.png)
+
+
+#### Anti-aliasing + Soft Shadow + Global Illumination
+<pre>
+<b>Anti-aliasing</b>  SSAA x16
+</pre>
+![Soft Shadow, Global Illumination](https://github.com/JCBreath/Ray-Tracing/raw/master/images/soft_shadow%2BGI.png)
