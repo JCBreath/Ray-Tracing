@@ -5,6 +5,8 @@
 #include "Color.h"
 #include <string>
 #include <vector>
+#include <list>
+#include "Vector.h"
 
 class Background;
 class Camera;
@@ -14,6 +16,12 @@ class Light;
 class Object;
 class RenderContext;
 class Ray;
+
+struct Photon{
+  Point pos;
+  Vector dir;
+  Color color;
+};
 
 class Scene {
  public:
@@ -99,13 +107,13 @@ class Scene {
   double getEnd() const{
     return end;
   }
-  
 
   void preprocess();
   void render();
   double traceRay(Color& result, const RenderContext& context, const Ray& ray, const Color& attenuation, int depth) const;
-  double traceRay(Color& result, const RenderContext& context, const Object* obj, const Ray& ray, const Color& attenuation, int depth) const;
+  double tracePhoton(Color& result, const RenderContext& context, const Ray& ray,  Color& power, Point& pos, Vector& dir) const;
   double getTime(double start, double end);
+  Color getRadiance(Point p) const;
 
  private:
   Scene(const Scene&);
@@ -123,6 +131,8 @@ class Scene {
   int supersamples;
   int dof_s;
   double start, end;
+  std::vector <Photon*> photon_map;
+  int photon_count;
 };
 
 #endif

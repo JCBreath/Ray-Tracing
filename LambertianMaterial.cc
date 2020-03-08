@@ -59,3 +59,9 @@ void LambertianMaterial::shade(Color& result, const RenderContext& context,
   }
   result = light*color;
 }
+
+void LambertianMaterial::photon(Color& light, const RenderContext& context, const Ray& ray,
+  const HitRecord& hit, Color& power, Point& pos, Vector& dir) const
+{
+
+}

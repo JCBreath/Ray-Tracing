@@ -6,13 +6,17 @@
 #include "Image.h"
 #include "Light.h"
 #include "Material.h"
+#include "GlassMaterial.h"
 #include "Object.h"
 #include "Ray.h"
 #include "RenderContext.h"
 #include <float.h>
 #include <iostream>
 #include <stdlib.h>
+#include <vector>
 using namespace std;
+
+
 
 Scene::Scene()
 {
@@ -27,6 +31,7 @@ Scene::Scene()
   dof_s = 4;
   start = 0.0;
   end = 1.0;
+  photon_count = 0;
 }
 
 Scene::~Scene()
@@ -65,16 +70,60 @@ void Scene::render()
   }
   int xres = image->getXresolution();
   int yres = image->getYresolution();
-  setMaxRayDepth(3);
+  setMaxRayDepth(4);
   RenderContext context(this);
   double dx = 2./xres;
   double xmin = -1. + dx/2.;
   double dy = 2./yres;
   double ymin = -1. + dy/2.;
   Color atten(1.,1.,1.);
+
+  // PHOTON MAPPING
+  Point light_pos(-25.0, -25.0, 50.0);
+  Point obj_pos(-7.0, -0.5, 2.0);
+  double r = 2.0;
+  Vector l_dir = light_pos - obj_pos;
+  l_dir.normalize();
+  for(int i=0;i<5000;i++){
+    Color l;
+    double r1 = (double)rand()/RAND_MAX;
+    double r2 = (double)rand()/RAND_MAX - .5;
+    double phi = M_PI * 2. * r1;
+    phi = 2 * i * M_PI / 1000;
+    double r_r = r * sqrt(r2);
+    Vector r_du = Cross(l_dir,Vector(0,1.,0));
+    r_du.normalize();
+    Vector r_dv = Cross(l_dir,r_du);
+    r_dv.normalize();
+    Vector r_u= r_du * cos(phi);
+    Vector r_v= r_dv * sin(phi);
+    Vector shift = r_u + r_v;
+    
+    Point rand_point = obj_pos + shift * r_r;
+    // Point rand_point = obj_pos + Vector(1,0,0)*r1*5 + Vector(0,1,0)*r2*2;
+    // rand_point = obj_pos;
+    Vector rand_dir = rand_point - light_pos;
+    rand_dir.normalize();
+
+    Ray ph_ray(light_pos, rand_dir);
+    Color power;
+    Point pos;
+    Vector dir;
+    tracePhoton(l, context, ph_ray, power, pos, dir);
+    Photon *p = new Photon();
+    p->pos = pos;
+    p->dir = dir;
+    p->color = power;
+    // cout<<p->pos<<endl;
+    photon_map.push_back(p);
+    photon_count++;
+  }
+  // RAY TRACING
+  // #pragma omp parallel for schedule(dynamic, 1)
   for(int i=0;i<yres;i++){
     //cerr << "y=" << i << '\n';
     double y = ymin + i*dy;
+    
     for(int j=0;j<xres;j++){
       double x = xmin + j*dx;
       //cerr << "x=" << j << ", y=" << i << '\n';
@@ -138,22 +187,31 @@ double Scene::traceRay(Color& result, const RenderContext& context, const Ray& r
   }
 }
 
-double Scene::traceRay(Color& result, const RenderContext& context, const Object* obj, const Ray& ray, const Color& atten, int depth) const
+
+double Scene::tracePhoton(Color& result, const RenderContext& context, const Ray& ray,  Color& power, Point& pos, Vector& dir) const
 {
-  if(depth >= maxRayDepth || atten.maxComponent() < minAttenuation){
-    result = Color(0, 0, 0);
-    return 0;
+  HitRecord hit(DBL_MAX);
+  object->intersect(hit, context, ray, 0);
+  if(hit.getPrimitive()){
+    // Ray hit something...
+    const Material* matl = hit.getMaterial();
+    matl->photon(result, context, ray, hit, power, pos, dir);
+    return hit.minT();
   } else {
-    HitRecord hit(DBL_MAX);
-    obj->intersect(hit, context, ray, (double)rand()/RAND_MAX*(end-start) + start);
-    if(hit.getPrimitive()){
-      // Ray hit something...
-      const Material* matl = hit.getMaterial();
-      matl->shade(result, context, ray, hit, atten, depth);
-      return hit.minT();
-    } else {
-      background->getBackgroundColor(result, context, ray);
-      return DBL_MAX;
+    return DBL_MAX;
+  }
+}
+
+Color Scene::getRadiance(Point p) const
+{
+  Color c(0,0,0);
+  double radius = .1;
+  for(int i=0;i<photon_map.size();i++){
+    double dist = (p - photon_map[i]->pos).normalize();
+    if(dist < radius) {
+      c += photon_map[i]->color * (double)(1. / photon_map.size() / radius) * 10.;
     }
   }
+
+  return(c);
 }

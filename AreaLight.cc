@@ -20,6 +20,7 @@ double AreaLight::getLight(Color& light_color, Vector& light_direction,
   light_color = color;
 
   Vector dir = position-hitpos;
+  dir.normalize();
   double phi = (double)rand()/RAND_MAX * M_PI * 2;
   double r_r = (2.*(double)rand()/RAND_MAX - 1) * r;
   Vector r_u=Cross(dir,Vector(0,1.,0)) * cos(phi);

@@ -155,11 +155,28 @@ void PhongMaterial::shade(Color& result, const RenderContext& context,
   }
   indirect_light /= 1.;
   */
-
+  // result = scene->getRadiance(hitpos);
   // result = (light) * color +  refl_color * Ks * atten;
-  result = direct_light * color + indirect_light * color + mirror_color;
+  // result = direct_light * color + indirect_light * color + mirror_color
+  result = direct_light * color + indirect_light * color + mirror_color + scene->getRadiance(hitpos);
   // result = (light + indir_color) * color +  refl_color * Ks * atten;
   //result = light*color + refl_color*Ks*atten;
+}
+
+void PhongMaterial::photon(Color& light, const RenderContext& context, const Ray& ray,
+  const HitRecord& hit, Color& power, Point& pos, Vector& dir) const
+{
+  const Scene* scene = context.getScene();
+  // Color light_color = light;
+  Vector normal;
+  Point hitpos = ray.origin()+ray.direction()*hit.minT();
+  hit.getPrimitive()->normal(normal, context, hitpos, ray, hit);
+  double cosphi = Dot(normal, -ray.direction());
+  power = Color(1,1,1)*cosphi;
+  pos = hitpos;
+  dir = normal;
+  // light = light*(Kd*cosphi);
+  // scene->storePhoton(0, 0, hitpos, normal, Color(1, 1, 1));
 }
 
 
