@@ -22,3 +22,9 @@
 <b>Anti-aliasing</b>  SSAA x16
 </pre>
 ![Soft Shadow, Global Illumination](https://github.com/JCBreath/Ray-Tracing/raw/master/images/soft_shadow%2BGI.png)
+
+#### Anti-aliasing + Soft Shadow + Global Illumination
+<pre>
+<b>Anti-aliasing</b>  SSAA x16
+</pre>
+![Soft Shadow, Global Illumination](https://github.com/JCBreath/Ray-Tracing/raw/master/images/caustics.png)
