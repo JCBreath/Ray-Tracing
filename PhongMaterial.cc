@@ -96,6 +96,7 @@ void PhongMaterial::shade(Color& result, const RenderContext& context,
       Ray shadowray(hitpos, light_direction);
       world->intersect(shadowhit, context, shadowray, (double)rand()/RAND_MAX*(scene->getEnd()-scene->getStart()) + scene->getStart());
       if(!shadowhit.getPrimitive()) {
+      // if(true) {
         // No shadows...
         if(cosphi > 0){
           direct_light += light_color*(Kd*cosphi);
@@ -103,12 +104,14 @@ void PhongMaterial::shade(Color& result, const RenderContext& context,
         if(cos_spec_phi > 0){
           direct_light += light_color*(Ks*pow(cos_spec_phi, 10));
         }  
+      } else {
+        direct_light += Color(0,0,0);
       }
   }
-  
+  /*
   // MIRROR
   Color mirror_color(0,0,0);
-  /*
+  
   Vector eye_refl_direction = 2 * Dot(normal, -ray.direction()) * normal - (-ray.direction());
   Ray mirror_ray(hitpos, eye_refl_direction);
   scene->traceRay(mirror_color, context, mirror_ray, atten*.5, depth + 1.);
@@ -158,7 +161,8 @@ void PhongMaterial::shade(Color& result, const RenderContext& context,
   // result = scene->getRadiance(hitpos);
   // result = (light) * color +  refl_color * Ks * atten;
   // result = direct_light * color + indirect_light * color + mirror_color
-  result = direct_light * color + indirect_light * color + mirror_color + scene->getRadiance(hitpos);
+  // result = color * Ka + direct_light * color + indirect_light * color + scene->getRadiance(hitpos);
+  result = direct_light * color + scene->getRadiance(hitpos);
   // result = (light + indir_color) * color +  refl_color * Ks * atten;
   //result = light*color + refl_color*Ks*atten;
 }
@@ -171,8 +175,9 @@ void PhongMaterial::photon(Color& light, const RenderContext& context, const Ray
   Vector normal;
   Point hitpos = ray.origin()+ray.direction()*hit.minT();
   hit.getPrimitive()->normal(normal, context, hitpos, ray, hit);
-  double cosphi = Dot(normal, -ray.direction());
-  power = Color(1,1,1)*cosphi;
+  // double cosphi = Dot(normal, -ray.direction());
+  // power = power*cosphi;
+  // cout<<power<<endl;
   pos = hitpos;
   dir = normal;
   // light = light*(Kd*cosphi);
