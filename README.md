@@ -5,7 +5,7 @@
 <b>Anti-aliasing</b>  SSAA x16
 <b>Photons</b>        500000
 </pre>
-![Soft Shadow, Global Illumination](https://github.com/JCBreath/Ray-Tracing/raw/master/images/dispersion.png)
+![Dispersion](https://github.com/JCBreath/Ray-Tracing/raw/master/images/dispersion.png)
 
 #### Anti-aliasing + Depth of Field + Motion Blur
 <pre>
@@ -35,4 +35,4 @@
 <b>Anti-aliasing</b>  SSAA x16
 <b>Photons</b>        100000
 </pre>
-![Soft Shadow, Global Illumination](https://github.com/JCBreath/Ray-Tracing/raw/master/images/caustics.png)
+![Caustics](https://github.com/JCBreath/Ray-Tracing/raw/master/images/caustics.png)
