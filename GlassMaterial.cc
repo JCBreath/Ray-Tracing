@@ -16,7 +16,7 @@ using namespace std;
 
 GlassMaterial::GlassMaterial()
 {
-  n_glass = 1.55;
+  n_glass = 1.5;
 }
 
 GlassMaterial::~GlassMaterial()
@@ -43,10 +43,10 @@ void GlassMaterial::shade(Color& result, const RenderContext& context,
   float fresneleffect = 1 - facingratio;
   Vector refldir = ray.direction() - normal * 2 * Dot(ray.direction(), normal); 
   refldir.normalize();
-  double cos_spec_phi = Dot(-ray.direction(), refldir);
   Color refl_color;
   Ray refl_ray(hitpos, refldir);
   scene->traceRay(refl_color, context, refl_ray, atten*.5, depth + 1.);
+
   float ior = n_glass, eta = (inside) ? ior : 1 / ior;
   float cosi = Dot(-normal, ray.direction()); 
   float k = 1 - eta * eta * (1 - cosi * cosi); 
@@ -57,6 +57,9 @@ void GlassMaterial::shade(Color& result, const RenderContext& context,
   scene->traceRay(refra_color, context, refra_ray, atten*.5, depth + 1.);
   // fresneleffect = 0.;
   result = refl_color * (fresneleffect) + refra_color * (1 - fresneleffect);
+  if(inside && Cross(normal, ray.direction()).normalize() > eta) {
+    result = refl_color;
+  }
 }
 
 
@@ -73,26 +76,35 @@ void GlassMaterial::photon(Color& light, const RenderContext& context, const Ray
     normal = -normal;
     inside = true;
   }
-
+  float n_fac = 1.;
+  double n_fac_r = (double)rand()/RAND_MAX - .5;
+  if(power.r() > 0.) {
+    // cout << n_fac_r << endl;
+    if(n_fac_r < 0.4)
+      n_fac = 0.87 + n_fac_r * .13;
+    else
+      n_fac = 0.99 + n_fac_r * .02;
+  } else if (power.g() > 0.) {
+    n_fac = 0.90 + n_fac_r * .13;
+  } else if (power.b() > 0.) {
+    n_fac = 0.94 + n_fac_r * .13;
+  }
+  float ior = n_glass * n_fac, eta = (inside) ? ior : 1 / ior;
   float facingratio = -Dot(ray.direction(), normal); 
   float fresneleffect = 1 - facingratio;
   double r = (double)rand()/RAND_MAX;
-  if(r < fresneleffect) {
+  if(r < fresneleffect || inside && (Cross(normal, ray.direction()).normalize() > eta)) {
   // if(false) {
+    // Vector refldir = ray.direction() - normal * 2 * Dot(ray.direction(), normal); 
+    // refldir.normalize();
     Vector refldir = ray.direction() - normal * 2 * Dot(ray.direction(), normal); 
     refldir.normalize();
     Color refl_color;
     Ray refl_ray(hitpos, refldir);
     scene->tracePhoton(light, context, refl_ray, power, pos, dir);
   } else {
-    float n_fac = 1.;
-    if(power.r() > 0.) {
-      // cout<<power<<endl;
-      n_fac = 0.95;
-    } else if (power.b() > 0.) {
-      n_fac = 1.05;
-    }
-    float ior = n_glass * n_fac, eta = (inside) ? ior : 1 / ior;
+    
+    
     float cosi = Dot(-normal, ray.direction()); 
     float k = 1 - eta * eta * (1 - cosi * cosi); 
     Vector refrdir = ray.direction() * eta + normal * (eta *  cosi - sqrt(k)); 

@@ -131,7 +131,7 @@ class Scene {
   int supersamples;
   int dof_s;
   double start, end;
-  std::vector <Photon*> photon_map[50][50];
+  std::vector <Photon*> photon_map[500][500];
   int photon_count;
 };
 

@@ -6,6 +6,7 @@
 #include "Primitive.h"
 #include "Ray.h"
 #include "RenderContext.h"
+#include "Polygon.h"
 #include "Scene.h"
 #include "Background.h"
 #include "Vector.h"
@@ -95,8 +96,9 @@ void PhongMaterial::shade(Color& result, const RenderContext& context,
       HitRecord shadowhit(dist);
       Ray shadowray(hitpos, light_direction);
       world->intersect(shadowhit, context, shadowray, (double)rand()/RAND_MAX*(scene->getEnd()-scene->getStart()) + scene->getStart());
-      if(!shadowhit.getPrimitive()) {
-      // if(true) {
+      // if(!shadowhit.getPrimitive()) {
+      if(true) {
+        // cout<<typeid(Polygon).name()<<endl;
         // No shadows...
         if(cosphi > 0){
           direct_light += light_color*(Kd*cosphi);
@@ -117,7 +119,7 @@ void PhongMaterial::shade(Color& result, const RenderContext& context,
   scene->traceRay(mirror_color, context, mirror_ray, atten*.5, depth + 1.);
   mirror_color *= Ks;
   */
-  /*
+  
   // INDIRECT ILLUMINATION
   for(int i=0;i<1;i++) {
     Color indirect_light_color(0,0,0);
@@ -157,12 +159,13 @@ void PhongMaterial::shade(Color& result, const RenderContext& context,
     
   }
   indirect_light /= 1.;
-  */
+  
   // result = scene->getRadiance(hitpos);
+  result = indirect_light * color + scene->getRadiance(hitpos);
   // result = (light) * color +  refl_color * Ks * atten;
   // result = direct_light * color + indirect_light * color + mirror_color
   // result = color * Ka + direct_light * color + indirect_light * color + scene->getRadiance(hitpos);
-  result = direct_light * color + scene->getRadiance(hitpos);
+  // result = direct_light * color + scene->getRadiance(hitpos);
   // result = (light + indir_color) * color +  refl_color * Ks * atten;
   //result = light*color + refl_color*Ks*atten;
 }
@@ -178,7 +181,8 @@ void PhongMaterial::photon(Color& light, const RenderContext& context, const Ray
   // double cosphi = Dot(normal, -ray.direction());
   // power = power*cosphi;
   // cout<<power<<endl;
-  pos = hitpos;
+  // pos = hitpos
+  pos = hitpos - Vector(.01 ,0. ,0.);
   dir = normal;
   // light = light*(Kd*cosphi);
   // scene->storePhoton(0, 0, hitpos, normal, Color(1, 1, 1));

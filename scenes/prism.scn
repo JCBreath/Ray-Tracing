@@ -1,0 +1,140 @@
+// This is a test scene for Specter.  Try running "specter test.scn".
+// x forward, y left, z up
+
+xres 512
+yres 512
+filename "test.ppm"
+ss 8
+dof 1
+start 0.0
+end 0.0
+
+camera pinhole {
+  eye [ -0.0, -10.4, 20.0 ]
+  lookat [ -0.0, -0.4, 0.0 ]
+  up [ 0.0, 1.0, 0.0 ]
+  hfov 30.0
+
+}
+
+background constant {
+  color [ 0.98, 1.0, 0.88 ]
+}
+
+ambient [ 1.0, 1.0, 1.0 ]
+
+light area {
+  position [ 0.0, 0.0, 15.0 ]
+  color [ 0.49, 0.5, 0.44 ]
+  r 0.1
+}
+
+scene group {
+  // left 1
+  polygon {
+    material glass
+    p0 [ -1.73, -1.5, 0.0 ]
+    p1 [ -1.73, -1.5, 1.0 ]
+    p2 [ 0.0, 1.5, 1.0 ]
+  }
+
+  // left 2
+  polygon {
+    material glass
+    p0 [ 0.0, 1.5, 1.0 ]
+    p1 [ 0.0, 1.5, 0.0 ]
+    p2 [ -1.73, -1.5, 0.0 ]
+  }
+
+  // right 1
+  polygon {
+    material glass
+    p0 [ 0.0, 1.5, 0.0 ]
+    p1 [ 0.0, 1.5, 1.0 ]
+    p2 [ 1.73, -1.5, 1.0 ]
+  }
+
+  // right 2
+  polygon {
+    material glass
+    p0 [ 1.73, -1.5, 1.0 ]
+    p1 [ 1.73, -1.5, 0.0 ]
+    p2 [ 0.0, 1.5, 0.0 ]
+  }
+
+  // top
+  polygon {
+    material glass
+    p2 [ -1.73, -1.5, 1.0 ]
+    p1 [ 0.0, 1.5, 1.0 ]
+    p0 [ 1.73, -1.5, 1.0 ]
+  }
+
+//  // Bottom
+//  polygon {
+//    material glass
+//    p0 [ -1.73, -1.5, 0.0 ]
+//    p1 [ 0.0, 1.5, 0.0 ]
+//    p2 [ 1.73, -1.5, 0.0 ]
+//  }
+  // down 1
+  polygon {
+    material glass
+    p0 [ 1.73, -1.5, 0.0 ]
+    p1 [ 1.73, -1.5, 1.0 ]
+    p2 [ -1.73, -1.5, 1.0 ]
+  }
+
+  // down 2
+  polygon {
+    material glass
+    p0 [ -1.73, -1.5, 1.0 ]
+    p1 [ -1.73, -1.5, 0.0 ]
+    p2 [ 1.73, -1.5, 0.0 ]
+  }
+
+  
+
+//  plane {
+//    material glass
+//    normal [ 1.0, 0.0, 0.0 ]
+//    point [ 1.0, 0.0, 0.0 ]
+//  }
+//  plane {
+//    material glass
+//    normal [ -1.0, 0.0, 0.0 ]
+//    point [ -1.0, 0.0, 0.0 ]
+//  }
+//  plane {
+//    material glass
+//    normal [ 0.0, -1.0, 1.0 ]
+//    point [ -0.001, 2.0, 0.0 ]
+//  }
+//  sphere {
+//    material glass
+//    center [ 2.0, -0.5, 0.5 ]
+//    radius 0.5
+//  }
+
+  sphere {
+    material phong {
+      color [ 1.0, 1.0, 1.0 ]
+      Kd 1.0
+      Ka 0.0
+      Ks 0.0
+    }
+    center [ 0.0, 0.0, -10000.001 ]
+    radius 10000.0
+  }
+
+//  plane {
+//    material phong {
+//      color [ 1.0, 1.0, 1.0 ]
+//      Kd 1.0
+//      Ka 0.0
+//      Ks 0.0
+//    }
+//    normal [ 0.0, 0.0, 1.0 ]
+//    point [ 0.0, 0.0, -0.001 ]
+//  }
+}

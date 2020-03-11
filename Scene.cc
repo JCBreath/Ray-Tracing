@@ -79,12 +79,20 @@ void Scene::render()
   Color atten(1.,1.,1.);
 
   // PHOTON MAPPING
-  Point light_pos(-400.0, -104.0, 4.0);
-  Point obj_pos(-20.0, -5.02, 0.0);
-  double r = 0.5;
+  Point light_pos(-1600.0, -400.0, 16.0);
+  Point obj_pos(-2.0, -0.50, 0.05);
+  double r = 0.15;
   Vector l_dir = light_pos - obj_pos;
   l_dir.normalize();
-  for(int i=0;i<500000;i++){
+
+  for(int i=0;i<10000000;i++){
+    // if(i > 1000000) {
+    //   light_pos = Point(0.0, 0.0, 200.0);
+    //   obj_pos = Point(0.0, 0, 0.0);
+    //   l_dir = light_pos - obj_pos;
+    //   l_dir.normalize();
+    //   r = 20.;
+    // }
     Color l;
     double r1 = (double)rand()/RAND_MAX;
     double r2 = (double)rand()/RAND_MAX - .5;
@@ -109,7 +117,7 @@ void Scene::render()
     Color power(.98, 1., .88);
     double clr_r = (double)rand()/RAND_MAX * 3;
     if(clr_r < 1.){
-      power = Color(.98, 0., 0.);
+      power = Color(0.98, 0., 0.);
     } else if(clr_r < 2.){
       power = Color(0., 1., 0.);
     } else {
@@ -125,14 +133,14 @@ void Scene::render()
     p->color = power;
     // cout<<p->pos<<endl;
     // cout<<(int)round(p->pos.x())<<endl;
-    int p_x = (int)round(p->pos.x());
-    int p_y = (int)round(p->pos.y());
-    if(p_x >= -24 && p_x < 25 && p_y >= -24 && p_y < 25) {
-      photon_map[p_x+24][p_y+24].push_back(p);
+    int p_x = (int)round(p->pos.x() * 10);
+    int p_y = (int)round(p->pos.y() * 10);
+    if(p_x >= -249 && p_x < 250 && p_y >= -249 && p_y < 250) {
+      photon_map[p_x+249][p_y+249].push_back(p);
       photon_count++;
     }
   }
-  // cout<<photon_map[24][24].size()<<endl;
+  cout<<"Photon Mapping finished with " <<photon_count<<" photons." <<endl;
   // RAY TRACING
   
   for(int i=0;i<yres;i++){
@@ -223,9 +231,11 @@ Color Scene::getRadiance(Point p) const
   
   Color c(0,0,0);
   
-  int p_x = (int)round(p.x()) + 24;
-  int p_y = (int)round(p.y()) + 24;
-  if(!(p_x >= 0 && p_x < 50 && p_y >= 0 && p_y < 50)) {
+  int p_x = (int)round(p.x() * 10) + 249;
+  int p_y = (int)round(p.y() * 10) + 249;
+  double o_p_x = p.x() * 10 + 249;
+  double o_p_y = p.y() * 10 + 249;
+  if(!(p_x >= 0 && p_x < 500 && p_y >= 0 && p_y < 500)) {
     return c;
   }
   vector<Photon*> p_map = photon_map[p_x][p_y];
@@ -234,22 +244,23 @@ Color Scene::getRadiance(Point p) const
   //   cout<<p_map.size()<<endl;
   
   
-  double radius = .5;
+  double radius = .05;
   // #pragma omp parallel for schedule(dynamic, 1)
   for(int j=0;j<p_map.size();j++){
     double dist = (p - p_map[j]->pos).normalize();
     if(dist < radius) {
-      c += p_map[j]->color * (double)(1. / photon_count / radius / radius / dist);
+      c += p_map[j]->color * (double)(1. / photon_count / radius / sqrt(dist));
     }
   }
   
-  if (abs(p.x()+24 - p_x) < radius) {
+  // cout << abs(p.x()+249 - p_x) <<endl;
+  if (abs(o_p_x - p_x) < radius*10) {
     bool valid = false;  
-    if(p.x()+24 - p_x < 0 && p_x >= 1) {
+    if(o_p_x - p_x < 0 && p_x >= 1) {
       p_map = photon_map[p_x-1][p_y];
       valid = true;
     }
-    else if(p.x()+24 - p_x > 0 && p_x < 49){
+    else if(o_p_x - p_x > 0 && p_x < 499){
       p_map = photon_map[p_x+1][p_y];
       valid = true;
     }
@@ -257,19 +268,19 @@ Color Scene::getRadiance(Point p) const
       for(int j=0;j<p_map.size();j++){
         double dist = (p - p_map[j]->pos).normalize();
         if(dist < radius) {
-          c += p_map[j]->color * (double)(1. / photon_count / radius / radius / dist);
+          c += p_map[j]->color * (double)(1. / photon_count / radius  / sqrt(dist));
         }
       }
     }
   }
-
-  if (abs(p.y()+24 - p_y) < radius) {
+  
+  if (abs(o_p_y - p_y) < radius*10) {
     bool valid = false;  
-    if(p.y()+24 - p_y < 0 && p_y >= 1) {
+    if(o_p_y - p_y < 0 && p_y >= 1) {
       p_map = photon_map[p_x][p_y-1];
       valid = true;
     }
-    else if(p.y()+24 - p_y > 0 && p_y < 49){
+    else if(o_p_y - p_y > 0 && p_y < 499){
       p_map = photon_map[p_x][p_y+1];
       valid = true;
     }
@@ -277,27 +288,27 @@ Color Scene::getRadiance(Point p) const
       for(int j=0;j<p_map.size();j++){
         double dist = (p - p_map[j]->pos).normalize();
         if(dist < radius) {
-          c += p_map[j]->color * (double)(1. / photon_count / radius / radius / dist);
+          c += p_map[j]->color * (double)(1. / photon_count / radius/ sqrt(dist));
         }
       }
     }
   }
-
-  if (abs(p.x()+24 - p_x) < radius && abs(p.y()+24 - p_y) < radius) {
+  
+  if (abs(o_p_x - p_x) < radius*10 && abs(o_p_y - p_y) < radius*10) {
     bool valid = false;  
-    if(p.x()+24 - p_x < 0 && p_x >= 1 && p.y()+24 - p_y < 0 && p_y >= 1) {
+    if(o_p_x - p_x < 0 && p_x >= 1 && o_p_y - p_y < 0 && p_y >= 1) {
       p_map = photon_map[p_x-1][p_y-1];
       valid = true;
     }
-    else if(p.x()+24 - p_x > 0 && p_x < 49 && p.y()+24 - p_y > 0 && p_y < 49){
+    else if(o_p_x - p_x > 0 && p_x < 499 && o_p_y - p_y > 0 && p_y < 499){
       p_map = photon_map[p_x+1][p_y+1];
       valid = true;
     }
-    else if(p.x()+24 - p_x > 0 && p_x < 49 && p.y()+24 - p_y < 0 && p_y >= 1){
+    else if(o_p_x - p_x > 0 && p_x < 499 && o_p_y - p_y < 0 && p_y >= 1){
       p_map = photon_map[p_x+1][p_y-1];
       valid = true;
     }
-    else if(p.x()+24 - p_x < 0 && p_x >= 1  && p.y()+24 - p_y > 0 && p_y < 49){
+    else if(o_p_x - p_x < 0 && p_x >= 1  && o_p_y - p_y > 0 && p_y < 499){
       p_map = photon_map[p_x-1][p_y+1];
       valid = true;
     }
@@ -305,32 +316,13 @@ Color Scene::getRadiance(Point p) const
       for(int j=0;j<p_map.size();j++){
         double dist = (p - p_map[j]->pos).normalize();
         if(dist < radius) {
-          c += p_map[j]->color * (double)(1. / photon_count / radius / radius / dist);
+          c += p_map[j]->color * (double)(1. / photon_count / radius / sqrt(dist));
         }
       }
     }
   }
-
-
-  /*
-  if (abs(p.z()+24 - p_y) < radius && abs(p.y()+24 - p_x) < radius) {
-    if(p.z()+24 - p_y > 0 && p.y()+24 - p_x > 0)
-      p_map = photon_map[p_x-1][p_y-1];
-    else if(p.z()+24 - p_y < 0 && p.y()+24 - p_x > 0)
-      p_map = photon_map[p_x-1][p_y+1];
-    else if(p.z()+24 - p_y > 0 && p.y()+24 - p_x < 0)
-      p_map = photon_map[p_x+1][p_y-1];
-    else if(p.z()+24 - p_y < 0 && p.y()+24 - p_x < 0)
-      p_map = photon_map[p_x+1][p_y+1];
-    for(int j=0;j<p_map.size();j++){
-      double dist = (p - p_map[j]->pos).normalize();
-      if(dist < radius) {
-        c += p_map[j]->color * (double)(1. / p_map.size() / radius / radius);
-      }
-    }
-  }
-  */
-  c = c * 1. * 3.;
+  
+  c = c * Color(1., 1. ,1.) * 3.0 * 3.;
   return(c);
   
 }
