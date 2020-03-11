@@ -1,6 +1,6 @@
 # Ray-Tracing
 
-#### Anti-aliasing + Caustics
+#### Anti-aliasing + Caustics + Light Dispersion
 <pre>
 <b>Anti-aliasing</b>    SSAA x8
 <b>Photon Count</b>     5000000
